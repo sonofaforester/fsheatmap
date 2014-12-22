@@ -1,4 +1,4 @@
-define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
+define(["knockout", "sammy", "hasher"], function(ko, sammy, hasher) {
 
     // This module configures crossroads.js, a routing library. If you prefer, you
     // can use any other routing library (or none at all) as Knockout is designed to
@@ -9,30 +9,62 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
     // Knockout that requires or even knows about this technique. It's just one of
     // many possible ways of setting up client-side routes.
 
-    return new Router({
-        routes: [
-            { url: '',          params: { page: 'home-page' } },
-            { url: 'about',     params: { page: 'about-page' } }
-        ]
-    });
+    return new Router();
 
+    // initialize the application
     function Router(config) {
         var currentRoute = this.currentRoute = ko.observable({});
 
-        ko.utils.arrayForEach(config.routes, function(route) {
-            crossroads.addRoute(route.url, function(requestParams) {
-                currentRoute(ko.utils.extend(requestParams, route.params));
+        var app = sammy('#main', function () {
+
+            // define a 'route'
+            this.get('#/', function () {
+                currentRoute(ko.utils.extend(this.params, {page: 'home-page'}));
             });
+
+            // define a 'route'
+            this.get('#/about', function () {
+               currentRoute(ko.utils.extend(this.params, { page: 'about-page' }));
+            });
+
+            this.get('#/person', function() {
+                currentRoute(ko.utils.extend(this.params, { page: 'person-page' }));
+            });
+
+
+
         });
 
-        activateCrossroads();
+        // start the application
+        app.run('#/');
     }
+ 
+    //return new Router({
+    //    routes: [
+    //        { url: '',          params: { page: 'home-page' } },
+    //        { url: 'about', params: { page: 'about-page' } },
+    //        {url: 'fstoken', params: {page: 'home-page'}}
+    //    ]
+    //});
 
-    function activateCrossroads() {
-        function parseHash(newHash, oldHash) { crossroads.parse(newHash); }
-        crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
-        hasher.initialized.add(parseHash);
-        hasher.changed.add(parseHash);
-        hasher.init();
-    }
+    //function Router(config) {
+    //    var currentRoute = this.currentRoute = ko.observable({});
+
+    //    ko.utils.arrayForEach(config.routes, function(route) {
+    //        crossroads.addRoute(route.url, function (requestParams) {
+    //            debugger;
+    //            currentRoute(ko.utils.extend(requestParams, route.params));
+    //        });
+    //    });
+
+    //    activateCrossroads();
+    //}
+
+    //function activateCrossroads() {
+    //    function parseHash(newHash, oldHash) { crossroads.parse(newHash); }
+    //    crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
+    //    hasher.initialized.add(parseHash);
+    //    hasher.changed.add(parseHash);
+    //    hasher.init();
+    //}
 });
